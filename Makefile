@@ -66,11 +66,10 @@ uninstall:
 .openssl.is.fresh: opensslpull
 	true
 opensslpull:
-	if [ -d openssl -a -d openssl/.git ]; then \
-		cd ./openssl && git checkout OpenSSL_1_0_2-stable && git pull | grep -q "Already up-to-date." && [ -e ../.openssl.is.fresh ] || touch ../.openssl.is.fresh ; \
-	else \
-		git clone https://github.com/openssl/openssl ./openssl && cd ./openssl && git checkout OpenSSL_1_0_2-stable && touch ../.openssl.is.fresh ; \
-	fi
+	git submodule update --init --remote openssl
+	cd openssl && git rev-parse --verify HEAD > ../.openssl.is.fresh.tmp
+	cmp -s .openssl.is.fresh.tmp .openssl.is.fresh || mv .openssl.is.fresh.tmp .openssl.is.fresh
+	rm -f .openssl.is.fresh.tmp
 	sed -i 's/# if 0/# if 1/g' openssl/ssl/s2_lib.c
 
 # Need to build OpenSSL differently on OSX
@@ -92,6 +91,7 @@ static: openssl/libcrypto.a
 	$(MAKE) sslscan STATIC_BUILD=TRUE
 
 clean:
-	if [ -d openssl -a -d openssl/.git ]; then ( cd ./openssl; git clean -fx ); fi;
+	if [ -d openssl -a -f openssl/.git ]; then ( cd ./openssl; git clean -dfx ); fi;
 	rm -f sslscan
 	rm -f .openssl.is.fresh
+	rm -f .openssl.is.fresh.tmp

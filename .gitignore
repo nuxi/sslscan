@@ -1,6 +1,7 @@
 # object files
 *.o
 *.obj
+tags
 
 # compiled binary
 sslscan
@@ -13,5 +14,5 @@ libcrypto*
 libssl*
 
 # custom openssl build
-openssl/
 .openssl.is.fresh
+.openssl.is.fresh.tmp
